@@ -1,10 +1,8 @@
-"""Маршрутизация: короткие/типовые реплики → дешёвая модель, сложные → сильная."""
-
-from .settings import CHEAP_MODEL, STRONG_MODEL
+"""Explicit heuristic, not a semantic complexity classifier."""
 
 
-def choose_model(message: str) -> str:
-    complex_markers = ("почему", "объясни", "расскажи историю", "план")
-    if len(message) > 200 or any(m in message.lower() for m in complex_markers):
-        return STRONG_MODEL
-    return CHEAP_MODEL
+def choose_model(message: str, settings) -> str:
+    markers = ("почему", "объясни", "расскажи историю", "план")
+    if len(message) > 200 or any(m in message.casefold() for m in markers):
+        return settings.strong_model
+    return settings.cheap_model

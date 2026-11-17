@@ -1,0 +1,9 @@
+.git
+.venv
+.env
+results
+docs
+videos
+tmp
+__pycache__
+*.zip
