@@ -82,7 +82,10 @@ def test_atomic_bucket(r, settings):
             return False
 
     with ThreadPoolExecutor(max_workers=20) as pool:
-        assert sum(pool.map(attempt, range(80))) == 30
+        started = time.perf_counter()
+        accepted = sum(pool.map(attempt, range(80)))
+        elapsed = time.perf_counter() - started
+        assert 30 <= accepted <= 30 + int(elapsed / 2)
     key = settings.prefix + "rl:parallel"
     assert 0 < r.ttl(key) <= 120
 

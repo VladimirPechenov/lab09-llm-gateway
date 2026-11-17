@@ -20,7 +20,7 @@ def get(r, settings, key: str):
 
 def put(r, settings, key: str, value: dict) -> None:
     if settings.cache_enabled:
-        r.setex(key, settings.cache_ttl, json.dumps(value, ensure_ascii=False))
+        r.set(key, json.dumps(value, ensure_ascii=False), ex=settings.cache_ttl)
 
 
 def stats(r, settings):
