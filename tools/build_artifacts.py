@@ -1,3 +1,4 @@
+# ruff: noqa: E501
 """Build six-page report, chart and video from measured JSON files."""
 
 import json
