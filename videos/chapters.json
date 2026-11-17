@@ -1,0 +1,46 @@
+[
+  {
+    "start_s": 0,
+    "title": "Auth: запрос без ключа"
+  },
+  {
+    "start_s": 10,
+    "title": "Обычный диалог: cache miss"
+  },
+  {
+    "start_s": 20,
+    "title": "Повтор: cache hit"
+  },
+  {
+    "start_s": 30,
+    "title": "Routing: сложный вопрос"
+  },
+  {
+    "start_s": 40,
+    "title": "Moderation: запрещённый ввод"
+  },
+  {
+    "start_s": 50,
+    "title": "Retry: один внедрённый timeout"
+  },
+  {
+    "start_s": 60,
+    "title": "Fallback: внедрённый сбой основной модели"
+  },
+  {
+    "start_s": 70,
+    "title": "Static fallback: внедрённый отказ авторизации"
+  },
+  {
+    "start_s": 80,
+    "title": "Выходной фильтр: внедрённая утечка"
+  },
+  {
+    "start_s": 90,
+    "title": "Rate limit: 31-й запрос"
+  },
+  {
+    "start_s": 100,
+    "title": "Health / Redis"
+  }
+]

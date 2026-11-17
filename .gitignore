@@ -24,3 +24,6 @@ logs/
 .idea/
 .vscode/
 .DS_Store
+
+# Artifact QA renders
+/tmp/

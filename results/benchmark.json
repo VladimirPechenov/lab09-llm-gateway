@@ -1,0 +1,71 @@
+{
+  "utc": "2026-11-17T15:09:06.343870+00:00",
+  "users": 50,
+  "duration_s_each": 300,
+  "spawn_rate": 50,
+  "wait_s": [
+    0.2,
+    1.0
+  ],
+  "common_fraction_target": 0.3,
+  "provider": "mock",
+  "mock_delay_s": 0.15,
+  "rate_limit_per_min": 100000,
+  "host": "Windows-11-10.0.26300-SP0",
+  "runs": {
+    "no_cache": {
+      "p50_ms": 150.0,
+      "p95_ms": 160.0,
+      "throughput_rps": 65.79247658868564,
+      "requests": 19704,
+      "failures": 0,
+      "cache_hit_percent": 0.0,
+      "elapsed_s": 301.05,
+      "counts": {
+        "responses": 19707,
+        "hits": 0,
+        "errors": 0,
+        "common_sent": 5939,
+        "unique_sent": 13777
+      },
+      "health": {
+        "status": "ok",
+        "provider": "mock",
+        "cache_enabled": false,
+        "redis": "ok",
+        "cache": {
+          "hit": 0,
+          "miss": 0,
+          "hit_percent": 0
+        }
+      }
+    },
+    "with_cache": {
+      "p50_ms": 150.0,
+      "p95_ms": 160.0,
+      "throughput_rps": 70.13858529826608,
+      "requests": 20937,
+      "failures": 0,
+      "cache_hit_percent": 29.892,
+      "elapsed_s": 300.91,
+      "counts": {
+        "responses": 21002,
+        "hits": 6278,
+        "errors": 0,
+        "common_sent": 6321,
+        "unique_sent": 14692
+      },
+      "health": {
+        "status": "ok",
+        "provider": "mock",
+        "cache_enabled": true,
+        "redis": "ok",
+        "cache": {
+          "hit": 6278,
+          "miss": 14724,
+          "hit_percent": 29.89
+        }
+      }
+    }
+  }
+}

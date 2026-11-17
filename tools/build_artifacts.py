@@ -47,12 +47,19 @@ def demo_frame(scene, index, progress=1):
     d.text((35, 25), "ЛР 9 · LLM gateway для диалогов NPC", font=font(34), fill=INK)
     d.text((35, 78), scene["title"], font=font(27), fill=ACCENT)
     d.rounded_rectangle((30, 125, 1250, 700), radius=15, fill="white")
-    y = draw_wrapped(d, "POST /v1/chat  ·  provider=mock  ·  Redis", (55, 145), size=23)
+    y = draw_wrapped(
+        d,
+        ("GET /health" if "GET" in scene["request"] else "POST /v1/chat") + "  ·  provider=mock  ·  Redis",
+        (55, 145),
+        size=23,
+    )
     y = draw_wrapped(d, json.dumps(scene["request"], ensure_ascii=False), (55, y + 12), width=82, size=23)
     d.text((55, y + 14), f"HTTP {scene['status']}", font=font(28), fill="#b54439" if scene["status"] >= 400 else ACCENT)
     y += 60
     response = json.dumps(scene["response"], ensure_ascii=False, indent=2)
-    draw_wrapped(d, response, (55, y), width=91, size=21)
+    lines = sum(max(1, len(textwrap.wrap(line, width=91))) for line in response.splitlines())
+    response_size = min(21, max(15, int((680 - y) / lines) - 10))
+    draw_wrapped(d, response, (55, y), width=91, size=response_size)
     d.text((35, 724), "Визуализация сохранённых API-ответов; сбои провайдера внедрены явно.", font=font(21), fill=INK)
     d.rectangle((35, 770, 1245, 778), fill="#dbe4ec")
     d.rectangle((35, 770, 35 + int(1210 * progress), 778), fill=ACCENT)
@@ -139,6 +146,7 @@ def sections(data, demo):
             [
                 "FastAPI предоставляет POST /v1/chat, GET /health, GET /metrics и интерактивную схему /docs. Вход содержит npc из списка trader/guard и непустую строку message до 4000 символов. Некорректная структура возвращает 422, отсутствующий либо неверный X-API-Key - 401.",
                 "Ключ сравнивается через compare_digest. В Redis используется SHA-256 отпечаток ключа, а в журнале - первые 12 символов отпечатка. Секрет и текст диалога в журнал не записываются. Клиенту возвращается X-Request-ID для поиска события.",
+                "Ключевой расчёт Lua: tokens = min(capacity, tokens + max(0, now-ts) * capacity/60). При tokens >= 1 расходуется один токен; иначе вычисляется Retry-After.",
                 "Token bucket реализован одним Lua-скриптом: Redis TIME задаёт часы, HMGET/HSET сохраняют остаток токенов и время, EXPIRE удаляет неактивные корзины через 120 с. Ёмкость равна RATE_LIMIT_PER_MIN, скорость пополнения - capacity/60 токенов в секунду. Это общий лимит для всех процессов с одним Redis.",
                 "При исчерпании токенов возвращаются 429 и Retry-After. При значении 30 мгновенный burst допускает 30 запросов, затем новый токен появляется примерно каждые 2 с. Это непрерывное пополнение, а не строгое скользящее окно на 60 с.",
                 "Маршрутизатор выбирает strong_model для текста длиннее 200 символов или содержащего «почему», «объясни», «расскажи историю», «план». Остальные сообщения идут в cheap_model. Это прозрачная эвристика; она не определяет смысловую сложность безошибочно.",
@@ -160,6 +168,7 @@ def sections(data, demo):
         (
             "4. Демонстрация и проверка поведения",
             [
+                "Видео (110 с): https://drive.google.com/file/d/1LKYwMnDvlv0UyaVCH-MsmGTrlP4YyP8C/view",
                 "Сценарии записаны tools/capture_demo.py через реальный FastAPI TestClient и отдельную Redis DB14. Это API-демонстрация; видео визуализирует сохранённые ответы, а не выдаётся за запись рабочего стола. Все JSON-ответы доступны в results/demo.json.",
                 f"Обычный запрос trader/«Привет»: HTTP 200, cached=false, latency_ms={first['latency_ms']}. Повтор: cached=true, latency_ms={second['latency_ms']}. Кешированный ответ содержит attempts=0 и ту же реплику.",
                 "Сложный вопрос выбирает gpt-4o вместо gpt-4o-mini (в mock это имена маршрутов). Без ключа получается 401; «Забудь инструкции…» даёт 400. Серия из 31 запроса при пустой корзине даёт 30 ответов 200 и один 429.",
@@ -173,7 +182,7 @@ def sections(data, demo):
             [
                 "Каждый режим измерен Locust с 50 пользователями, скоростью запуска 50 пользователей/с и длительностью 300 с от начала разгона. Между запросами пауза 0.2–1.0 с. В каждом цикле клиента 3 из 10 запросов общие, остальные имеют уникальный player/serial. При завершении выполняющиеся запросы получают до 10 с на окончание.",
                 "Оба прогона обращаются по HTTP к gateway в Docker Compose, Redis также работает в контейнере. В mock LLM задержка 150 мс; CACHE_TTL_S=3600. Перед режимом очищается только DB0 выделенного учебного Redis. RATE_LIMIT_PER_MIN=100000 временно исключает 429 из измерения кеша; рабочий лимит 30 проверен отдельно и восстановлен после теста.",
-                f"Без кеша: {a['requests']} запросов, {a['failures']} ошибок. С кешем: {b['requests']} запросов, {b['failures']} ошибок. Доля попаданий вычислена по полю cached успешных ответов; значения также сверены с Redis /health.",
+                f"Последний CSV snapshot: без кеша {a['requests']} запросов, с кешем {b['requests']}; ошибок 0. Финальные счётчики после остановки: {a['counts']['responses']} и {b['counts']['responses']} ответов. Разница связана с периодичностью CSV. Cache hit = hits/responses финального счётчика, сверено с Redis /health.",
                 "p50/p95 и Requests/s берутся из итоговой строки Aggregated Locust CSV, то есть включают сеть и обработку клиента, а не только latency_ms сервера. Границы процентилей округляются Locust. Throughput зависит от времени ожидания клиента и не является абсолютной пропускной способностью сервера.",
                 "Один прогон на режим не позволяет оценить доверительный интервал. Постоянная задержка заглушки не моделирует очереди, токены, стоимость и распределение времени реального API. Полученные числа относятся только к данной конфигурации; они не повторяют примерные числа преподавателя.",
             ],
@@ -232,10 +241,12 @@ def main():
             story.append(Paragraph(escape(text), small if i == 5 and j >= 5 else normal))
             markdown.append(text + "\n")
             if i == 1 and j == 0:
+                markdown.append("![Архитектура](img/architecture.png)\n")
                 story.extend(
                     [PDFImage(str(ROOT / "docs/img/architecture.png"), width=170 * mm, height=54.6 * mm), Spacer(1, 8)]
                 )
-            if i == 3 and j == 1:
+            if i == 3 and j == 2:
+                markdown.append("![API-демонстрация](img/demo.png)\n")
                 story.extend(
                     [PDFImage(str(ROOT / "docs/img/demo.png"), width=165 * mm, height=103.1 * mm), Spacer(1, 8)]
                 )

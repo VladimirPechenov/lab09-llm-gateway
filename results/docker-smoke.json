@@ -1,0 +1,68 @@
+{
+  "docker_http": "passed",
+  "first": {
+    "reply": "Стой, путник. Гильдии спорят из-за старой башни. Соблюдай порядок.",
+    "model": "gpt-4o-mini",
+    "cached": false,
+    "latency_ms": 152.255,
+    "attempts": 1,
+    "degraded": false,
+    "moderated": false
+  },
+  "repeat": {
+    "reply": "Стой, путник. Гильдии спорят из-за старой башни. Соблюдай порядок.",
+    "model": "gpt-4o-mini",
+    "cached": true,
+    "latency_ms": 0.701,
+    "attempts": 0,
+    "degraded": false,
+    "moderated": false
+  },
+  "auth_status": 401,
+  "moderation_status": 400,
+  "health": {
+    "status": "ok",
+    "provider": "mock",
+    "cache_enabled": true,
+    "redis": "ok",
+    "cache": {
+      "hit": 6279,
+      "miss": 14725,
+      "hit_percent": 29.89
+    }
+  },
+  "prometheus_targets": {
+    "status": "success",
+    "data": {
+      "activeTargets": [
+        {
+          "discoveredLabels": {
+            "__address__": "gateway:8000",
+            "__metrics_path__": "/metrics",
+            "__scheme__": "http",
+            "__scrape_interval__": "5s",
+            "__scrape_timeout__": "5s",
+            "job": "npc_gateway"
+          },
+          "labels": {
+            "instance": "gateway:8000",
+            "job": "npc_gateway"
+          },
+          "scrapePool": "npc_gateway",
+          "scrapeUrl": "http://gateway:8000/metrics",
+          "globalUrl": "http://gateway:8000/metrics",
+          "lastError": "",
+          "lastScrape": "2026-11-17T15:21:04.975846379Z",
+          "lastScrapeDuration": 0.001402871,
+          "health": "up",
+          "scrapeInterval": "5s",
+          "scrapeTimeout": "5s"
+        }
+      ],
+      "droppedTargets": [],
+      "droppedTargetCounts": {
+        "npc_gateway": 0
+      }
+    }
+  }
+}
