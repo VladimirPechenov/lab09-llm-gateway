@@ -1,0 +1,48 @@
+# HELP gateway_requests_total All chat responses
+# TYPE gateway_requests_total counter
+gateway_requests_total{status="401"} 1.0
+gateway_requests_total{status="200"} 37.0
+gateway_requests_total{status="400"} 1.0
+gateway_requests_total{status="429"} 1.0
+# HELP gateway_requests_created All chat responses
+# TYPE gateway_requests_created gauge
+gateway_requests_created{status="401"} 1.794928125882598e+09
+gateway_requests_created{status="200"} 1.7949281260406976e+09
+gateway_requests_created{status="400"} 1.7949281262066734e+09
+gateway_requests_created{status="429"} 1.7949281267759707e+09
+# HELP gateway_latency_seconds Full chat latency including auth/errors
+# TYPE gateway_latency_seconds histogram
+gateway_latency_seconds_bucket{le="0.005"} 36.0
+gateway_latency_seconds_bucket{le="0.01"} 36.0
+gateway_latency_seconds_bucket{le="0.025"} 36.0
+gateway_latency_seconds_bucket{le="0.05"} 36.0
+gateway_latency_seconds_bucket{le="0.075"} 36.0
+gateway_latency_seconds_bucket{le="0.1"} 36.0
+gateway_latency_seconds_bucket{le="0.25"} 39.0
+gateway_latency_seconds_bucket{le="0.5"} 40.0
+gateway_latency_seconds_bucket{le="0.75"} 40.0
+gateway_latency_seconds_bucket{le="1.0"} 40.0
+gateway_latency_seconds_bucket{le="2.5"} 40.0
+gateway_latency_seconds_bucket{le="5.0"} 40.0
+gateway_latency_seconds_bucket{le="7.5"} 40.0
+gateway_latency_seconds_bucket{le="10.0"} 40.0
+gateway_latency_seconds_bucket{le="+Inf"} 40.0
+gateway_latency_seconds_count 40.0
+gateway_latency_seconds_sum 0.816251500044018
+# HELP gateway_latency_seconds_created Full chat latency including auth/errors
+# TYPE gateway_latency_seconds_created gauge
+gateway_latency_seconds_created 1.7949281258575594e+09
+# HELP gateway_provider_attempts_total Provider attempts
+# TYPE gateway_provider_attempts_total counter
+gateway_provider_attempts_total 11.0
+# HELP gateway_provider_attempts_created Provider attempts
+# TYPE gateway_provider_attempts_created gauge
+gateway_provider_attempts_created 1.7949281258575594e+09
+# HELP gateway_cache_total Cache decisions
+# TYPE gateway_cache_total counter
+gateway_cache_total{result="miss"} 6.0
+gateway_cache_total{result="hit"} 31.0
+# HELP gateway_cache_created Cache decisions
+# TYPE gateway_cache_created gauge
+gateway_cache_created{result="miss"} 1.794928125888653e+09
+gateway_cache_created{result="hit"} 1.794928126045983e+09

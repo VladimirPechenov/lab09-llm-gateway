@@ -44,9 +44,9 @@ def main():
             run("docker", "compose", "exec", "-T", "redis", "redis-cli", "FLUSHDB")
             run("docker", "compose", "up", "-d", "--wait", "--force-recreate", "gateway")
             with httpx.Client() as client:
-                assert client.get("http://localhost:8000/health").status_code == 200
+                assert client.get("http://127.0.0.1:8000/health").status_code == 200
             prefix = ROOT / "results" / mode
-            env = {**os.environ, "LOAD_COUNTS_FILE": str(prefix) + "_counts.json"}
+            env = {**os.environ, "LOAD_COUNTS_FILE": str(prefix) + "_counts.json", "PYTHONUTF8": "1"}
             started = time.perf_counter()
             with open(str(prefix) + "_locust.log", "w", encoding="utf-8") as log:
                 run(
@@ -65,7 +65,7 @@ def main():
                     "--stop-timeout",
                     "10",
                     "--host",
-                    "http://localhost:8000",
+                    "http://127.0.0.1:8000",
                     "--csv",
                     str(prefix),
                     "--csv-full-history",
@@ -77,9 +77,9 @@ def main():
             rows = list(csv.DictReader(Path(str(prefix) + "_stats.csv").open(encoding="utf-8")))
             row = next(row for row in rows if row["Name"] == "Aggregated")
             counts = json.loads(Path(str(prefix) + "_counts.json").read_text())
-            health = httpx.get("http://localhost:8000/health").json()
+            health = httpx.get("http://127.0.0.1:8000/health").json()
             (ROOT / f"results/{mode}_metrics.txt").write_text(
-                httpx.get("http://localhost:8000/metrics").text, encoding="utf-8"
+                httpx.get("http://127.0.0.1:8000/metrics").text, encoding="utf-8"
             )
             with (ROOT / f"results/{mode}_gateway.log").open("w", encoding="utf-8") as log:
                 run("docker", "compose", "logs", "--no-color", "gateway", stdout=log)
