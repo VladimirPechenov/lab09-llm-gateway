@@ -1,6 +1,8 @@
 """Bounded retries, independent fallback and explicit offline mode."""
+
 import time
 from dataclasses import dataclass
+
 import httpx
 
 PERSONAS = {
@@ -31,7 +33,8 @@ def call(settings, model: str, npc: str, message: str) -> str:
 
         with OpenAI(timeout=settings.timeout, max_retries=0) as client:
             response = client.chat.completions.create(
-                model=model, max_tokens=200,
+                model=model,
+                max_tokens=200,
                 messages=[{"role": "system", "content": system}, {"role": "user", "content": message}],
             )
         return response.choices[0].message.content or ""
@@ -39,16 +42,22 @@ def call(settings, model: str, npc: str, message: str) -> str:
 
     with Anthropic(timeout=settings.timeout, max_retries=0) as client:
         response = client.messages.create(
-            model=model, max_tokens=200, system=system, messages=[{"role": "user", "content": message}],
+            model=model,
+            max_tokens=200,
+            system=system,
+            messages=[{"role": "user", "content": message}],
         )
     return "".join(block.text for block in response.content if block.type == "text")
 
 
 def is_transient(exc: Exception) -> bool:
     status = getattr(exc, "status_code", None)
-    return isinstance(exc, (TimeoutError, ConnectionError, httpx.TransportError)) or (
-        type(exc).__name__ in {"APITimeoutError", "APIConnectionError"}
-    ) or status in {408, 409, 429} or (status is not None and status >= 500)
+    return (
+        isinstance(exc, (TimeoutError, ConnectionError, httpx.TransportError))
+        or (type(exc).__name__ in {"APITimeoutError", "APIConnectionError"})
+        or status in {408, 409, 429}
+        or (status is not None and status >= 500)
+    )
 
 
 def call_with_fallback(settings, model: str, npc: str, message: str) -> Result:

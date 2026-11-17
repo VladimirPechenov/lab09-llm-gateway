@@ -1,6 +1,8 @@
 """Configuration injectable into app/tests; offline mock is the default."""
+
 import os
 from dataclasses import dataclass, field
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -9,8 +11,9 @@ load_dotenv()
 @dataclass
 class Settings:
     redis_url: str = field(default_factory=lambda: os.getenv("REDIS_URL", "redis://localhost:6379/0"))
-    api_keys: tuple = field(default_factory=lambda: tuple(
-        k.strip() for k in os.getenv("API_KEYS", "dev-key").split(",") if k.strip()))
+    api_keys: tuple = field(
+        default_factory=lambda: tuple(k.strip() for k in os.getenv("API_KEYS", "dev-key").split(",") if k.strip())
+    )
     rate_limit: int = field(default_factory=lambda: int(os.getenv("RATE_LIMIT_PER_MIN", "30")))
     cache_ttl: int = field(default_factory=lambda: int(os.getenv("CACHE_TTL_S", "3600")))
     cache_enabled: bool = field(default_factory=lambda: os.getenv("CACHE_ENABLED", "true").lower() == "true")

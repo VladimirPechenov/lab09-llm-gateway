@@ -36,7 +36,8 @@ class ChatOut(BaseModel):
 def create_app(settings: Settings | None = None, redis_client=None) -> FastAPI:
     config = settings or Settings()
     r = redis_client or redis.Redis.from_url(
-        config.redis_url, decode_responses=True, socket_timeout=1, socket_connect_timeout=1)
+        config.redis_url, decode_responses=True, socket_timeout=1, socket_connect_timeout=1
+    )
 
     @asynccontextmanager
     async def lifespan(app):
@@ -62,8 +63,16 @@ def create_app(settings: Settings | None = None, redis_client=None) -> FastAPI:
             elapsed = time.perf_counter() - started
             reqs.labels(str(response.status_code)).inc()
             lat.observe(elapsed)
-            log.info(json.dumps({"request_id": request_id, "status": response.status_code,
-                                 "latency_ms": round(elapsed * 1000, 3), **request.state.audit}))
+            log.info(
+                json.dumps(
+                    {
+                        "request_id": request_id,
+                        "status": response.status_code,
+                        "latency_ms": round(elapsed * 1000, 3),
+                        **request.state.audit,
+                    }
+                )
+            )
         response.headers["X-Request-ID"] = request_id
         return response
 
@@ -75,8 +84,13 @@ def create_app(settings: Settings | None = None, redis_client=None) -> FastAPI:
     def health(response: Response):
         try:
             r.ping()
-            return {"status": "ok", "provider": config.provider, "cache_enabled": config.cache_enabled,
-                    "redis": "ok", "cache": cache.stats(r, config)}
+            return {
+                "status": "ok",
+                "provider": config.provider,
+                "cache_enabled": config.cache_enabled,
+                "redis": "ok",
+                "cache": cache.stats(r, config),
+            }
         except redis.RedisError:
             response.status_code = 503
             return {"status": "unavailable", "redis": "unavailable"}
@@ -99,15 +113,24 @@ def create_app(settings: Settings | None = None, redis_client=None) -> FastAPI:
                 generated = llm.call_with_fallback(config, model, body.npc, body.message)
                 calls.inc(generated.attempts)
                 reply, moderated = moderation.clean_output(generated.reply)
-                value = {"reply": reply, "model": generated.model, "degraded": generated.degraded,
-                         "moderated": moderated}
+                value = {
+                    "reply": reply,
+                    "model": generated.model,
+                    "degraded": generated.degraded,
+                    "moderated": moderated,
+                }
                 if not generated.degraded and not moderated:
                     cache.put(r, config, key, value)
                 result = {**value, "cached": False, "attempts": generated.attempts}
         except redis.RedisError as exc:
             raise HTTPException(503, "storage unavailable") from exc
-        request.state.audit.update(model=result["model"], cached=result["cached"], attempts=result["attempts"],
-                                   degraded=result["degraded"], moderated=result["moderated"])
+        request.state.audit.update(
+            model=result["model"],
+            cached=result["cached"],
+            attempts=result["attempts"],
+            degraded=result["degraded"],
+            moderated=result["moderated"],
+        )
         return ChatOut(**result, latency_ms=round((time.perf_counter() - started) * 1000, 3))
 
     return app

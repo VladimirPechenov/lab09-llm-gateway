@@ -1,4 +1,5 @@
 """Demonstration substring policy, not production safety."""
+
 import unicodedata
 
 BLOCKED = ("ignore previous", "забудь инструкции", "system prompt", "ты ии", "сделать бомбу", "kill yourself")
